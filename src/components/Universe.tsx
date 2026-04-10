@@ -260,8 +260,21 @@ function FlyController() {
     };
 
     const onWheel = (e: WheelEvent) => {
-      // Translating along the Z axis pushes the camera relative to where it is currently "looking"
-      camera.translateZ(e.deltaY * 0.08);
+      // Calculate Normalized Device Coordinates (NDC) from cursor position
+      const rect = canvas.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      // Cast a vector from the camera out into the 3D world matching the cursor's focal point
+      const mouseDirection = new THREE.Vector3(x, y, 0.5);
+      mouseDirection.unproject(camera);
+      mouseDirection.sub(camera.position).normalize();
+
+      // DeltaY is usually (-100) for forward/zoom-in, (+100) for backward/zoom-out.
+      const distance = e.deltaY * 0.08;
+      
+      // Move camera strictly along the cursor's focal vector!
+      camera.position.addScaledVector(mouseDirection, -distance);
     };
 
     canvas.style.cursor = "grab";
