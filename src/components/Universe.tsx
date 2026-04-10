@@ -146,9 +146,6 @@ function Planet({ data }: { data: PlanetData }) {
         <PositionalAudio
           ref={audioRef}
           url={data.audioUrl}
-          distanceModel="exponential"
-          distance={5}
-          rolloffFactor={4}
           loop
           autoplay
         />

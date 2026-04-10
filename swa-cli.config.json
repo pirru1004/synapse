@@ -1,0 +1,10 @@
+{
+  "configurations": {
+    "app": {
+      "outputLocation": ".next",
+      "appLocation": ".",
+      "appBuildCommand": "npm run build",
+      "apiLocation": ""
+    }
+  }
+}
