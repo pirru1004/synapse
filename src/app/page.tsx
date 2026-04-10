@@ -38,7 +38,7 @@ export default function Home() {
       const clusterY = (Math.abs((hash * 17) % range) - range / 2) * 0.5; 
       const clusterZ = (Math.abs((hash * 23) % range) - range / 2) - 30;  
 
-      const newPlanets = [];
+      const newPlanets: PlanetData[] = [];
 
       for (let i = 0; i < data.results.length; i++) {
         const track = data.results[i];
@@ -133,7 +133,7 @@ export default function Home() {
         });
       }
 
-      setPlanets((prev) => [...prev, ...(newPlanets as PlanetData[])]);
+      setPlanets((prev) => [...prev, ...newPlanets]);
       
       if (!searchHistory.includes(query)) {
         setSearchHistory((prev) => [...prev, query]);
