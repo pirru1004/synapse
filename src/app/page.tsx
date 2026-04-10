@@ -66,6 +66,7 @@ export default function Home() {
 
         // Visual Textures & Geometry strongly driven by GENRE
         let geometryType: "sphere" | "icosahedron" | "torus" | "dodecahedron" | "octahedron" = "sphere";
+        let textureType: "ocean" | "caramel" | "crystal" | "rock" = "ocean";
         let roughness = 0.4;
         let metalness = 0.1;
         let wireframe = false;
@@ -75,22 +76,27 @@ export default function Home() {
           roughness = 0.1;
           metalness = 0.9; // Highly reflective
           wireframe = (trackHash % 3 === 0); // High chance of wireframe
+          textureType = "crystal";
         } else if (genre.includes("Rock") || genre.includes("Metal")) {
           geometryType = trackHash % 2 === 0 ? "icosahedron" : "dodecahedron";
           roughness = 0.8; // Very rough
           metalness = 0.3;
+          textureType = "rock";
         } else if (genre.includes("Hip-Hop") || genre.includes("Rap")) {
           geometryType = "dodecahedron";
           roughness = 0.3;
           metalness = 0.6;
+          textureType = "rock";
         } else if (genre.includes("Classical") || genre.includes("Jazz")) {
           geometryType = "sphere";
           roughness = 0.05; // Extremely smooth glass
           metalness = 0.8;
+          textureType = "ocean";
         } else if (genre.includes("Pop")) {
-          geometryType = "torus";
+          geometryType = "sphere"; // Spheres look amazing with caramel
           roughness = 0.5;
           metalness = 0.4;
+          textureType = "caramel";
         }
 
         // Movement
@@ -118,6 +124,7 @@ export default function Home() {
           artworkUrl: track.artworkUrl100,
           genre,
           geometryType,
+          textureType,
           rotationSpeed,
           roughness,
           metalness,

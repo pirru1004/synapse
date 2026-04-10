@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Stars, Text, PositionalAudio, Billboard, Image } from "@react-three/drei";
+import { Stars, Text, PositionalAudio, Billboard, Image, useTexture } from "@react-three/drei";
 import { Suspense, useEffect, useRef, useState, useMemo } from "react";
 import * as THREE from "three";
 
@@ -56,6 +56,7 @@ export interface PlanetData {
   audioUrl?: string;
   artworkUrl?: string;
   genre?: string;
+  textureType?: "ocean" | "caramel" | "crystal" | "rock";
   geometryType?: "sphere" | "icosahedron" | "torus" | "dodecahedron" | "octahedron";
   rotationSpeed?: number;
   roughness?: number;
@@ -73,6 +74,13 @@ function Planet({ data }: { data: PlanetData }) {
   const audioRef = useRef<any>(null);
   const analyserRef = useRef<THREE.AudioAnalyser | null>(null);
   const [hovered, setHovered] = useState(false);
+
+  // Load the mathematically seamless textures from the public folder
+  const textureStr = data.textureType ?? "ocean";
+  const texture = useTexture(`/synapse/textures/${textureStr}.png`);
+  // Ensure the texture wraps organically globally over the primitive shapes
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
 
   // Unique rotation and reactive audio animation per planet
   useFrame(({ camera }) => {
@@ -159,6 +167,7 @@ function Planet({ data }: { data: PlanetData }) {
       >
         {renderGeometry()}
         <meshStandardMaterial
+          map={texture}
           color={hovered ? "#ffffff" : data.color}
           roughness={data.roughness ?? 0.4}
           metalness={data.metalness ?? 0.1}
