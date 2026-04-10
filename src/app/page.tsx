@@ -16,7 +16,7 @@ export default function Home() {
     
     try {
       // Fetch actual songs from iTunes Search API (CORS friendly, no auth required)
-      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=5`);
+      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=30`);
       const data = await res.json();
 
       if (!data.results || data.results.length === 0) {
@@ -102,16 +102,15 @@ export default function Home() {
         // Movement
         const rotationSpeed = 0.001 + (durationMod * 0.015);
 
-        // STRICTION COLLISION AVOIDANCE: Force massive separation algebraically
-        // We use a strictly stepped wide-angle distribution with massive radius
-        const minRadius = 120 + (trackHash % 40); // Base radius of 120 units out
-        const angle = (i / data.results.length) * Math.PI * 2; // Split the circle perfectly
+        // FIBONACCI SPHERE DISTRIBUTION: Surround the player tightly from EVERY 3D angle (so they never get lost)
+        const phi = Math.acos(-1 + (2 * i) / data.results.length);
+        const theta = Math.sqrt(data.results.length * Math.PI) * phi;
         
-        const offsetX = Math.cos(angle) * minRadius;
-        const offsetZ = Math.sin(angle) * minRadius;
+        const spreadRadius = 140 + (trackHash % 60); // Randomize depth slightly to make it organic
         
-        // Alternate them heavily up and down so they are not in a flat line
-        const offsetY = (i % 2 === 0 ? 60 : -60) + ((trackHash % 20) - 10);
+        const offsetX = spreadRadius * Math.cos(theta) * Math.sin(phi);
+        const offsetY = spreadRadius * Math.sin(theta) * Math.sin(phi);
+        const offsetZ = spreadRadius * Math.cos(phi);
 
         newPlanets.push({
           id: `planet-${trackHash}-${i}`,
