@@ -62,6 +62,7 @@ export interface PlanetData {
   roughness?: number;
   metalness?: number;
   wireframe?: boolean;
+  searchQuery?: string;
 }
 
 interface UniverseProps {

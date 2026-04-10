@@ -9,6 +9,7 @@ export default function Home() {
   const [planets, setPlanets] = useState<PlanetData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
@@ -127,18 +128,27 @@ export default function Home() {
           rotationSpeed,
           roughness,
           metalness,
-          wireframe
+          wireframe,
+          searchQuery: query
         });
       }
 
       setPlanets((prev) => [...prev, ...(newPlanets as PlanetData[])]);
-
+      
+      if (!searchHistory.includes(query)) {
+        setSearchHistory((prev) => [...prev, query]);
+      }
     } catch (err) {
       console.error(err);
-      setError("Calculation anomaly detected.");
+      setError("SYSTEM_FAILURE: Unable to establish subspace connection to iTunes API.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const removeSearch = (query: string) => {
+    setSearchHistory((prev) => prev.filter(q => q !== query));
+    setPlanets((prev) => prev.filter(p => p.searchQuery !== query));
   };
 
   return (
@@ -203,6 +213,34 @@ export default function Home() {
           </div>
         </footer>
       </div>
+
+      {/* Active Scans / Search History Panel */}
+      <AnimatePresence>
+        {searchHistory.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            className="absolute right-6 top-24 w-64 bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-4 z-50 pointer-events-auto shadow-2xl"
+          >
+            <h3 className="text-white/70 text-xs uppercase tracking-widest mb-3 font-semibold">Active Scans</h3>
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto no-scrollbar">
+              {searchHistory.map((query) => (
+                <div key={query} className="flex items-center justify-between bg-white/5 hover:bg-white/10 transition-colors border border-white/5 rounded-lg px-3 py-2 group">
+                  <span className="text-white text-sm truncate pr-2 font-medium">{query}</span>
+                  <button 
+                    onClick={() => removeSearch(query)}
+                    className="text-white/40 hover:text-red-400 focus:outline-none opacity-0 group-hover:opacity-100 transition-all rounded-full p-1"
+                    title="Remove cluster"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </main>
   );
