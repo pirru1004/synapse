@@ -15,10 +15,16 @@ export default function Home() {
     setError(null);
     
     try {
-      // Because we are deploying to GitHub Pages (Static HTML Export), 
-      // we cannot use a Node.JS server for API logic.
-      // So we generate the mathematical space completely client-side!
-      
+      // Fetch actual songs from iTunes Search API (CORS friendly, no auth required)
+      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=5`);
+      const data = await res.json();
+
+      if (!data.results || data.results.length === 0) {
+        setError("NO AUDIO SIGNATURES DETECTED IN THIS SECTOR.");
+        setIsLoading(false);
+        return;
+      }
+
       // Hash the base query to derive cluster center
       let hash = 0;
       for (let i = 0; i < query.length; i++) {
@@ -31,31 +37,66 @@ export default function Home() {
       const clusterY = (Math.abs((hash * 17) % range) - range / 2) * 0.5; 
       const clusterZ = (Math.abs((hash * 23) % range) - range / 2) - 30;  
 
-      // Generate 5 planets (simulating Top 5 Songs)
       const newPlanets = [];
-      const songNames = ["Phantom", "Stardust", "Nebula", "Nova", "Eclipse"];
 
-      for (let i = 0; i < 5; i++) {
-        const hue = Math.abs((hash + (i * 45)) % 360);
-        const size = 1.0 + (Math.abs((hash + i) % 10) / 10) * 2.5; 
+      for (let i = 0; i < data.results.length; i++) {
+        const track = data.results[i];
         
-        // Scatter them slightly around the cluster center
-        const offsetX = Math.cos(i * (Math.PI * 2) / 5) * (size * 8);
-        const offsetZ = Math.sin(i * (Math.PI * 2) / 5) * (size * 8);
-        const offsetY = (Math.abs((hash + i * 7) % 5) - 2.5);
+        // Characteristic 1: Parse Genre
+        const genre = track.primaryGenreName || "Unknown";
+        
+        // Characteristic 2: Derive unique properties from track info
+        const trackHash = track.trackId || (Date.now() + i);
+        const durationMod = track.trackTimeMillis ? (track.trackTimeMillis % 100) / 100 : 0.5;
+        
+        const size = 1.2 + (trackHash % 50) / 20; 
+        
+        // Define Color by Genre (Fallback to hash)
+        let hue;
+        if (genre.includes("Pop")) hue = 320; // Pink
+        else if (genre.includes("Rock") || genre.includes("Metal")) hue = 0; // Red
+        else if (genre.includes("Electronic") || genre.includes("Dance")) hue = 180; // Cyan
+        else if (genre.includes("Hip-Hop") || genre.includes("Rap")) hue = 270; // Purple
+        else if (genre.includes("Country") || genre.includes("Folk")) hue = 30; // Orange
+        else if (genre.includes("Classical") || genre.includes("Jazz")) hue = 210; // Blue
+        else hue = Math.abs((hash + (i * 75)) % 360);
+        
+        // Add variations to hue
+        const finalHue = (hue + (trackHash % 40) - 20 + 360) % 360;
+
+        // Visual Textures & Geometry
+        const shapes: Array<"sphere" | "icosahedron" | "torus" | "dodecahedron" | "octahedron"> = ["sphere", "icosahedron", "torus", "dodecahedron", "octahedron"];
+        const geometryType = shapes[trackHash % shapes.length];
+        const roughness = 0.1 + (trackHash % 90) / 100;
+        const metalness = 0.1 + ((trackHash * 7) % 90) / 100;
+        const wireframe = (trackHash % 7 === 0);
+        
+        // Movement
+        const rotationSpeed = 0.001 + (durationMod * 0.015);
+
+        // Scatter them far apart
+        const spread = size * 35; 
+        const offsetX = Math.cos(i * (Math.PI * 2) / 5) * spread;
+        const offsetZ = Math.sin(i * (Math.PI * 2) / 5) * spread;
+        const offsetY = (Math.abs((trackHash + i * 7) % 30) - 15);
 
         newPlanets.push({
-          id: `planet-${Date.now()}-${i}`,
-          name: `${query.toUpperCase()} - ${songNames[i]}`,
-          description: `Track ${i + 1} of ${query}`,
+          id: `planet-${trackHash}-${i}`,
+          name: track.trackName.length > 20 ? track.trackName.substring(0, 20) + "..." : track.trackName,
+          description: `${genre} • By ${track.artistName}`,
           position: [clusterX + offsetX, clusterY + offsetY, clusterZ + offsetZ],
-          color: `hsl(${hue}, 80%, 60%)`,
+          color: `hsl(${finalHue}, 85%, 65%)`,
           size,
+          audioUrl: track.previewUrl,
+          artworkUrl: track.artworkUrl100,
+          genre,
+          geometryType,
+          rotationSpeed,
+          roughness,
+          metalness,
+          wireframe
         });
       }
-
-      // Small artificial delay to show UI loading
-      await new Promise(resolve => setTimeout(resolve, 600));
 
       setPlanets((prev) => [...prev, ...(newPlanets as PlanetData[])]);
 
@@ -68,7 +109,7 @@ export default function Home() {
   };
 
   return (
-    <main className="relative flex flex-col items-center justify-center min-h-screen w-full bg-black overflow-hidden font-mono antialiased">
+    <main className="fixed inset-0 flex flex-col items-center justify-center w-full h-full bg-black overflow-hidden font-mono antialiased">
       
       {/* 3D WebGL Background Container */}
       <Universe planets={planets} />
