@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Static export for GitHub Pages
   output: "export",
+  // GitHub Pages serves from /synapse/ subdirectory
+  basePath: "/synapse",
   // Disable image optimization for static export
   images: {
     unoptimized: true,
