@@ -13,28 +13,55 @@ export default function Home() {
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     setError(null);
+    
     try {
-      const response = await fetch("/api/explore", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ query }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to explore the universe");
-      }
-
-      const data = await response.json();
+      // Because we are deploying to GitHub Pages (Static HTML Export), 
+      // we cannot use a Node.JS server for API logic.
+      // So we generate the mathematical space completely client-side!
       
-      // Add the new planets to our universe array
-      if (data.planets && data.planets.length > 0) {
-        setPlanets((prev) => [...prev, ...data.planets]);
+      // Hash the base query to derive cluster center
+      let hash = 0;
+      for (let i = 0; i < query.length; i++) {
+          hash = query.charCodeAt(i) + ((hash << 5) - hash);
       }
+
+      // Cluster Center
+      const range = 100;
+      const clusterX = (Math.abs((hash * 13) % range) - range / 2);
+      const clusterY = (Math.abs((hash * 17) % range) - range / 2) * 0.5; 
+      const clusterZ = (Math.abs((hash * 23) % range) - range / 2) - 30;  
+
+      // Generate 5 planets (simulating Top 5 Songs)
+      const newPlanets = [];
+      const songNames = ["Phantom", "Stardust", "Nebula", "Nova", "Eclipse"];
+
+      for (let i = 0; i < 5; i++) {
+        const hue = Math.abs((hash + (i * 45)) % 360);
+        const size = 1.0 + (Math.abs((hash + i) % 10) / 10) * 2.5; 
+        
+        // Scatter them slightly around the cluster center
+        const offsetX = Math.cos(i * (Math.PI * 2) / 5) * (size * 8);
+        const offsetZ = Math.sin(i * (Math.PI * 2) / 5) * (size * 8);
+        const offsetY = (Math.abs((hash + i * 7) % 5) - 2.5);
+
+        newPlanets.push({
+          id: `planet-${Date.now()}-${i}`,
+          name: `${query.toUpperCase()} - ${songNames[i]}`,
+          description: `Track ${i + 1} of ${query}`,
+          position: [clusterX + offsetX, clusterY + offsetY, clusterZ + offsetZ],
+          color: `hsl(${hue}, 80%, 60%)`,
+          size,
+        });
+      }
+
+      // Small artificial delay to show UI loading
+      await new Promise(resolve => setTimeout(resolve, 600));
+
+      setPlanets((prev) => [...prev, ...(newPlanets as PlanetData[])]);
+
     } catch (err) {
       console.error(err);
-      setError("Communication with mission control lost.");
+      setError("Calculation anomaly detected.");
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +98,7 @@ export default function Home() {
         <footer className="flex justify-between items-end text-xs text-white/30 tracking-widest w-full pointer-events-auto">
           <div className="flex flex-col gap-1">
             <span>SYSTEM_READY</span>
-            <span>PUBLIC_ACCESS_GRANTED</span>
+            <span>STATIC_OVERRIDE_ACTIVE</span>
           </div>
           
           <AnimatePresence>
@@ -97,8 +124,8 @@ export default function Home() {
           </AnimatePresence>
 
           <div className="text-right flex flex-col gap-1">
-            <span>v1.0.0-galaxy</span>
-            <span>SERVER_CREDENTIAL_ROUTING</span>
+            <span>v2.0.0-static</span>
+            <span>GITHUB_PAGES_MODE</span>
           </div>
         </footer>
       </div>
