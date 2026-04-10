@@ -5,6 +5,21 @@ import { SearchBar } from "@/components/SearchBar";
 import { Universe, PlanetData } from "@/components/Universe";
 import { motion, AnimatePresence } from "framer-motion";
 
+interface ITunesTrack {
+  trackId: number;
+  trackName: string;
+  artistName: string;
+  previewUrl: string;
+  artworkUrl100: string;
+  primaryGenreName: string;
+  trackTimeMillis: number;
+}
+
+interface ITunesResponse {
+  resultCount: number;
+  results: ITunesTrack[];
+}
+
 export default function Home() {
   const [planets, setPlanets] = useState<PlanetData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +33,7 @@ export default function Home() {
     try {
       // Fetch actual songs from iTunes Search API (CORS friendly, no auth required)
       const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=6`);
-      const data = await res.json();
+      const data: ITunesResponse = await res.json();
 
       if (!data.results || data.results.length === 0) {
         setError("NO AUDIO SIGNATURES DETECTED IN THIS SECTOR.");
@@ -41,7 +56,7 @@ export default function Home() {
       const newPlanets: PlanetData[] = [];
 
       for (let i = 0; i < data.results.length; i++) {
-        const track = data.results[i];
+        const track: ITunesTrack = data.results[i];
         
         // Characteristic 1: Parse Genre
         const genre = track.primaryGenreName || "Unknown";

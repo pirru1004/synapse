@@ -72,7 +72,7 @@ interface UniverseProps {
 function Planet({ data }: { data: PlanetData }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Mesh>(null);
-  const audioRef = useRef<any>(null);
+  const audioRef = useRef<THREE.PositionalAudio>(null);
   const analyserRef = useRef<THREE.AudioAnalyser | null>(null);
   const [hovered, setHovered] = useState(false);
 
@@ -97,7 +97,7 @@ function Planet({ data }: { data: PlanetData }) {
     // Web Audio Analyzer Physics
     if (audioRef.current && audioRef.current.getVolume) {
       // Connect visual analyzer if not initialized
-      if (!analyserRef.current) {
+      if (!analyserRef.current && audioRef.current) {
          try {
            analyserRef.current = new THREE.AudioAnalyser(audioRef.current, 64);
          } catch (e) { /* ignore until audio context is unlocked */ }
