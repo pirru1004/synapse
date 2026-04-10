@@ -232,10 +232,10 @@ export default function Home() {
       <AnimatePresence>
         {searchHistory.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 50 }}
-            className="absolute right-6 top-24 w-64 bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-4 z-50 pointer-events-auto shadow-2xl"
+            initial={{ opacity: 0, x: 50, y: "-50%" }}
+            animate={{ opacity: 1, x: 0, y: "-50%" }}
+            exit={{ opacity: 0, x: 50, y: "-50%" }}
+            className="absolute right-6 top-1/2 w-64 bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-4 z-50 pointer-events-auto shadow-2xl"
           >
             <h3 className="text-white/70 text-xs uppercase tracking-widest mb-3 font-semibold">Active Scans</h3>
             <div className="space-y-2 max-h-[60vh] overflow-y-auto no-scrollbar">
