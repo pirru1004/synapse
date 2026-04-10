@@ -21,20 +21,13 @@ interface UniverseProps {
 // Automatically animate the camera to focus on the target position
 function CameraController({ targetPosition }: { targetPosition: [number, number, number] | null }) {
   const { camera } = useThree();
-  const vec = new THREE.Vector3();
-  const target = new THREE.Vector3();
-
-  useEffect(() => {
-    if (targetPosition) {
-      target.set(targetPosition[0], targetPosition[1], targetPosition[2]);
-    }
-  }, [targetPosition]);
+  const vec = useRef(new THREE.Vector3());
 
   useFrame(() => {
     if (targetPosition) {
-      // Lerp camera position slightly offset from the target
-      vec.set(target.x, target.y + Math.max(8, targetPosition[1] + 5), target.z + Math.max(20, targetPosition[2] + 10));
-      camera.position.lerp(vec, 0.05);
+      // Lerp camera position slightly offset from the target safely
+      vec.current.set(targetPosition[0], targetPosition[1] + 5, targetPosition[2] + 25);
+      camera.position.lerp(vec.current, 0.05);
     }
   });
 
@@ -123,6 +116,9 @@ export function Universe({ planets }: UniverseProps) {
     }
   }, [planets]);
 
+  // Safe default target
+  const targetVec = activeTarget ? activeTarget : [0, 0, 0];
+
   return (
     <div className="absolute inset-0 w-full h-full bg-[#050510] z-0 pointer-events-auto">
       <Canvas camera={{ position: [0, 5, 20], fov: 45 }}>
@@ -155,7 +151,7 @@ export function Universe({ planets }: UniverseProps) {
           enableRotate={true}
           autoRotate={true}
           autoRotateSpeed={0.5}
-          target={activeTarget ? new THREE.Vector3(...activeTarget) : new THREE.Vector3(0, 0, 0)}
+          target={targetVec as unknown as THREE.Vector3}
         />
       </Canvas>
     </div>
