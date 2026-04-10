@@ -96,11 +96,16 @@ export default function Home() {
         // Movement
         const rotationSpeed = 0.001 + (durationMod * 0.015);
 
-        // Scatter widely and randomly
-        const spreadMultiplier = 50 + (trackHash % 30); // Dynamic massive spread
-        const offsetX = (Math.random() - 0.5) * spreadMultiplier;
-        const offsetY = (Math.random() - 0.5) * spreadMultiplier * 0.8;
-        const offsetZ = (Math.random() - 0.5) * spreadMultiplier;
+        // STRICTION COLLISION AVOIDANCE: Force massive separation algebraically
+        // We use a strictly stepped wide-angle distribution with massive radius
+        const minRadius = 120 + (trackHash % 40); // Base radius of 120 units out
+        const angle = (i / data.results.length) * Math.PI * 2; // Split the circle perfectly
+        
+        const offsetX = Math.cos(angle) * minRadius;
+        const offsetZ = Math.sin(angle) * minRadius;
+        
+        // Alternate them heavily up and down so they are not in a flat line
+        const offsetY = (i % 2 === 0 ? 60 : -60) + ((trackHash % 20) - 10);
 
         newPlanets.push({
           id: `planet-${trackHash}-${i}`,
