@@ -223,7 +223,7 @@ export default function Home() {
 
           <div className="text-right flex flex-col gap-1">
             <span>Made with ❤️ for humanity</span>
-            <span>GITHUB_PAGES_MODE</span>
+            <span>VERCEL_NATIVE</span>
           </div>
         </footer>
       </div>

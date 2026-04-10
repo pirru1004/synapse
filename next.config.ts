@@ -1,12 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export",
-  basePath: "/synapse",
-  assetPrefix: "/synapse",
-  images: {
-    unoptimized: true,
-  },
+  // Pure Vercel native configuration
+  reactStrictMode: true,
 };
 
 export default nextConfig;

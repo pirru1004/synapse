@@ -78,7 +78,7 @@ function Planet({ data }: { data: PlanetData }) {
 
   // Load the mathematically seamless textures from the public folder
   const textureStr = data.textureType ?? "ocean";
-  const texture = useTexture(`/synapse/textures/${textureStr}.png`);
+  const texture = useTexture(`/textures/${textureStr}.png`);
   // Ensure the texture wraps organically globally over the primitive shapes
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
