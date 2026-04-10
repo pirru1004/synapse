@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars, Text } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
@@ -16,22 +16,6 @@ export interface PlanetData {
 
 interface UniverseProps {
   planets: PlanetData[];
-}
-
-// Automatically animate the camera to focus on the target position
-function CameraController({ targetPosition }: { targetPosition: [number, number, number] | null }) {
-  const { camera } = useThree();
-  const vec = useRef(new THREE.Vector3());
-
-  useFrame(() => {
-    if (targetPosition) {
-      // Lerp camera position slightly offset from the target safely
-      vec.current.set(targetPosition[0], targetPosition[1] + 5, targetPosition[2] + 25);
-      camera.position.lerp(vec.current, 0.05);
-    }
-  });
-
-  return null;
 }
 
 function Planet({ data, onClick }: { data: PlanetData, onClick: () => void }) {
@@ -105,19 +89,13 @@ function Planet({ data, onClick }: { data: PlanetData, onClick: () => void }) {
 }
 
 export function Universe({ planets }: UniverseProps) {
-  // We keep track of the currently "locked" target coordinate
-  const [activeTarget, setActiveTarget] = useState<[number, number, number] | null>(null);
+  const [activeTarget, setActiveTarget] = useState<[number, number, number]>([0, 0, 0]);
 
-  // Whenever a new search happens and planets are added, auto-lock onto the first new planet of the cluster!
   useEffect(() => {
     if (planets.length > 0) {
-      // The newest cluster is the last 5 elements, but looking at the very first one in the new array is fine
       setActiveTarget(planets[planets.length - 1].position);
     }
   }, [planets]);
-
-  // Safe default target
-  const targetVec = activeTarget ? activeTarget : [0, 0, 0];
 
   return (
     <div className="absolute inset-0 w-full h-full bg-[#050510] z-0 pointer-events-auto">
@@ -143,15 +121,13 @@ export function Universe({ planets }: UniverseProps) {
           />
         ))}
 
-        <CameraController targetPosition={activeTarget} />
-
         <OrbitControls
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
           autoRotate={true}
           autoRotateSpeed={0.5}
-          target={targetVec as unknown as THREE.Vector3}
+          target={activeTarget}
         />
       </Canvas>
     </div>
