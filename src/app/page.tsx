@@ -17,7 +17,7 @@ export default function Home() {
     
     try {
       // Fetch actual songs from iTunes Search API (CORS friendly, no auth required)
-      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=30`);
+      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=6`);
       const data = await res.json();
 
       if (!data.results || data.results.length === 0) {
@@ -168,15 +168,29 @@ export default function Home() {
             {/* Minimalist instructions */}
             <div className="flex flex-col items-end bg-black/40 px-4 py-3 rounded-xl border border-white/10 backdrop-blur-sm text-xs text-white/50 gap-1 text-right">
                 <span className="text-emerald-400 font-bold mb-1">CONTROLS</span>
-                <span>🖱️ Click + Drag to Rotate Void</span>
-                <span>⚙️ Scroll to Zoom Camera</span>
-                <span>🎯 Click a Planet to Travel</span>
+                <span>🖱️ Click + Drag to Look Around</span>
+                <span>⚙️ Scroll to Fly Towards Cursor</span>
+                <span>🎧 Hover to Preview Audio Node</span>
             </div>
           </div>
         </header>
 
         {/* Central Search Element */}
-        <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+        <div className="flex flex-col items-center gap-4 w-full">
+          <AnimatePresence>
+            {planets.length === 0 && !isLoading && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="text-white/40 text-xs tracking-[0.2em] uppercase font-bold text-center"
+              >
+                For best experience use 🎧
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+        </div>
 
         {/* Footer / Status */}
         <footer className="flex justify-between items-end text-xs text-white/30 tracking-widest w-full pointer-events-auto">
@@ -208,7 +222,7 @@ export default function Home() {
           </AnimatePresence>
 
           <div className="text-right flex flex-col gap-1">
-            <span>v2.0.0-static</span>
+            <span>Made with ❤️ for humanity</span>
             <span>GITHUB_PAGES_MODE</span>
           </div>
         </footer>
