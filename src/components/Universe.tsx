@@ -294,6 +294,32 @@ function FlyController() {
   return null;
 }
 
+// Emulates a true infinitely-distant night sky by locking translation (but not rotation) to the camera
+function InfiniteStars() {
+  const groupRef = useRef<THREE.Group>(null);
+  
+  useFrame(({ camera }) => {
+    if (groupRef.current) {
+      // Pin the star sphere to the camera so the user can never fly out of bounds
+      groupRef.current.position.copy(camera.position);
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      <Stars
+        radius={200}
+        depth={100}
+        count={20000} // Heavily increased star density
+        factor={7}
+        saturation={0}
+        fade
+        speed={1.5}
+      />
+    </group>
+  );
+}
+
 export function Universe({ planets }: UniverseProps) {
   return (
     <div className="absolute inset-0 w-full h-full bg-[#050510] z-0 pointer-events-auto">
@@ -303,15 +329,7 @@ export function Universe({ planets }: UniverseProps) {
         
         <ReactiveBackground />
         
-        <Stars
-          radius={100}
-          depth={50}
-          count={7000}
-          factor={8}
-          saturation={0}
-          fade
-          speed={1.5}
-        />
+        <InfiniteStars />
 
         <Suspense fallback={null}>
           {planets.map((p) => (
