@@ -32,7 +32,18 @@ export default function Home() {
     
     try {
       // Fetch actual songs from iTunes Search API (CORS friendly, no auth required)
-      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=6`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+      
+      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=6`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      
+      if (!res.ok) {
+        throw new Error(`API returned status ${res.status}`);
+      }
+      
       const data: ITunesResponse = await res.json();
 
       if (!data.results || data.results.length === 0) {
@@ -154,8 +165,16 @@ export default function Home() {
         setSearchHistory((prev) => [...prev, query]);
       }
     } catch (err) {
-      console.error(err);
-      setError("SYSTEM_FAILURE: Unable to establish subspace connection to iTunes API.");
+      console.error("Search error:", err);
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      
+      if (errorMsg.includes('abort') || errorMsg.includes('timeout')) {
+        setError("TRANSMISSION ERROR: iTunes API unreachable. Connection timeout.");
+      } else if (errorMsg.includes('Failed to fetch') || errorMsg.includes('CORS')) {
+        setError("FIREWALL DETECTED: Authorization Required. Try another search.");
+      } else {
+        setError("SYSTEM_FAILURE: Unable to access data stream. Retry connection.");
+      }
     } finally {
       setIsLoading(false);
     }
