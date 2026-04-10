@@ -67,7 +67,7 @@ interface UniverseProps {
   planets: PlanetData[];
 }
 
-function Planet({ data, isActive, onClick }: { data: PlanetData, isActive: boolean, onClick: () => void }) {
+function Planet({ data }: { data: PlanetData }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   const audioRef = useRef<any>(null);
@@ -155,10 +155,6 @@ function Planet({ data, isActive, onClick }: { data: PlanetData, isActive: boole
         onPointerOut={() => {
           setHovered(false);
           document.body.style.cursor = 'default';
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick();
         }}
       >
         {renderGeometry()}
@@ -286,16 +282,6 @@ function FlyController() {
 }
 
 export function Universe({ planets }: UniverseProps) {
-  const [activePlanetId, setActivePlanetId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (planets.length > 0) {
-      setActivePlanetId(planets[planets.length - 1].id);
-    }
-  }, [planets]);
-
-  const activePlanet = planets.find(p => p.id === activePlanetId);
-
   return (
     <div className="absolute inset-0 w-full h-full bg-[#050510] z-0 pointer-events-auto">
       <Canvas camera={{ position: [0, 5, 45], fov: 45 }}>
@@ -319,8 +305,6 @@ export function Universe({ planets }: UniverseProps) {
             <Planet 
               key={p.id} 
               data={p} 
-              isActive={activePlanetId === p.id}
-              onClick={() => setActivePlanetId(p.id)}
             />
           ))}
         </Suspense>

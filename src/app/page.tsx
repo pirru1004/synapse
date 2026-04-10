@@ -64,21 +64,43 @@ export default function Home() {
         // Add variations to hue
         const finalHue = (hue + (trackHash % 40) - 20 + 360) % 360;
 
-        // Visual Textures & Geometry
-        const shapes: Array<"sphere" | "icosahedron" | "torus" | "dodecahedron" | "octahedron"> = ["sphere", "icosahedron", "torus", "dodecahedron", "octahedron"];
-        const geometryType = shapes[trackHash % shapes.length];
-        const roughness = 0.1 + (trackHash % 90) / 100;
-        const metalness = 0.1 + ((trackHash * 7) % 90) / 100;
-        const wireframe = (trackHash % 7 === 0);
-        
+        // Visual Textures & Geometry strongly driven by GENRE
+        let geometryType: "sphere" | "icosahedron" | "torus" | "dodecahedron" | "octahedron" = "sphere";
+        let roughness = 0.4;
+        let metalness = 0.1;
+        let wireframe = false;
+
+        if (genre.includes("Electronic") || genre.includes("Dance")) {
+          geometryType = trackHash % 2 === 0 ? "torus" : "octahedron";
+          roughness = 0.1;
+          metalness = 0.9; // Highly reflective
+          wireframe = (trackHash % 3 === 0); // High chance of wireframe
+        } else if (genre.includes("Rock") || genre.includes("Metal")) {
+          geometryType = trackHash % 2 === 0 ? "icosahedron" : "dodecahedron";
+          roughness = 0.8; // Very rough
+          metalness = 0.3;
+        } else if (genre.includes("Hip-Hop") || genre.includes("Rap")) {
+          geometryType = "dodecahedron";
+          roughness = 0.3;
+          metalness = 0.6;
+        } else if (genre.includes("Classical") || genre.includes("Jazz")) {
+          geometryType = "sphere";
+          roughness = 0.05; // Extremely smooth glass
+          metalness = 0.8;
+        } else if (genre.includes("Pop")) {
+          geometryType = "torus";
+          roughness = 0.5;
+          metalness = 0.4;
+        }
+
         // Movement
         const rotationSpeed = 0.001 + (durationMod * 0.015);
 
-        // Scatter them far apart
-        const spread = size * 35; 
-        const offsetX = Math.cos(i * (Math.PI * 2) / 5) * spread;
-        const offsetZ = Math.sin(i * (Math.PI * 2) / 5) * spread;
-        const offsetY = (Math.abs((trackHash + i * 7) % 30) - 15);
+        // Scatter widely and randomly
+        const spreadMultiplier = 50 + (trackHash % 30); // Dynamic massive spread
+        const offsetX = (Math.random() - 0.5) * spreadMultiplier;
+        const offsetY = (Math.random() - 0.5) * spreadMultiplier * 0.8;
+        const offsetZ = (Math.random() - 0.5) * spreadMultiplier;
 
         newPlanets.push({
           id: `planet-${trackHash}-${i}`,
